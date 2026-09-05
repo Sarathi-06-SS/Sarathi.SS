@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroAI Hub — Smart Efficient Farming</title>
+  <meta name="description" content="Unified hub for Smart Efficient Farming: ESP32 live sensor monitoring, AI soil prediction, and plant disease detection." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #22c55e;
+      --teal:    #14b8a6;
+      --emerald: #10b981;
+      --sky:     #0ea5e9;
+      --purple:  #a855f7;
+      --orange:  #f97316;
+      --dark:    #0a0f0d;
+      --glass:   rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --text:    #f0fdf4;
+      --muted:   rgba(240,253,244,0.55);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 15% 20%, rgba(34,197,94,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 60% at 85% 80%, rgba(20,184,166,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 65% 10%, rgba(168,85,247,0.08) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 450px; height: 450px; background: var(--green); top: -160px; left: -120px; animation: orbF 14s ease-in-out infinite alternate; }
+    .orb-2 { width: 380px; height: 380px; background: var(--teal);  bottom:-130px; right:-100px; animation: orbF 11s ease-in-out 3s infinite alternate; }
+    .orb-3 { width: 260px; height: 260px; background: var(--purple); top:40%; left:55%; opacity:0.18; animation: orbF 9s ease-in-out 6s infinite alternate; }
+    @keyframes orbF { from { transform:translate(0,0) scale(1); } to { transform:translate(30px,-40px) scale(1.07); } }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 70px;
+    }
+
+    /* NAV */
+    .nav {
+      width: 100%; max-width: 1100px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 26px 0;
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: 16px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px;
+      text-decoration: none; color: var(--text);
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 22px rgba(34,197,94,0.4);
+    }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+
+    /* UDP badge */
+    #udp-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border);
+      transition: all 0.5s ease;
+    }
+    #udp-badge .dot { width:7px; height:7px; border-radius:50%; background:#6b7280; transition:background 0.5s; }
+    #udp-badge.live  { background:rgba(34,197,94,0.15); border-color:rgba(34,197,94,0.4); color:#86efac; }
+    #udp-badge.live .dot  { background:var(--green); animation: pulse 1.4s infinite; }
+    #udp-badge.offline { background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); color:#fca5a5; }
+    #udp-badge.offline .dot { background:#ef4444; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.7)} 70%{box-shadow:0 0 0 8px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+
+    /* Nav sensor strip */
+    #sensor-strip { display:flex; align-items:center; gap:9px; font-size:0.72rem; font-weight:500; color:var(--muted); transition:opacity 0.4s; }
+    #sensor-strip .sv { background:var(--glass); border:1px solid var(--glass-border); padding:3px 9px; border-radius:6px; white-space:nowrap; }
+    #sensor-strip.hidden { opacity:0; pointer-events:none; }
+
+    /* HERO */
+    .hero { text-align:center; padding:64px 0 52px; max-width:700px; animation: fdUp 0.7s ease both; }
+    .hero-tag {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:6px 16px; border-radius:100px;
+      background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3);
+      font-size:0.82rem; font-weight:600; color:var(--green); letter-spacing:0.4px; margin-bottom:24px;
+    }
+    .hero-tag .tdot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.4s infinite; }
+    .hero h1 { font-size:clamp(2.2rem,5vw,3.8rem); font-weight:900; line-height:1.1; letter-spacing:-1.5px; margin-bottom:18px; animation:fdUp 0.8s 0.1s ease both; }
+    .hero h1 .grad { background:linear-gradient(90deg,var(--green),var(--teal),var(--emerald)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero p { font-size:1.05rem; color:var(--muted); line-height:1.7; animation:fdUp 0.9s 0.2s ease both; }
+    @keyframes fdUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+
+    /* CARDS */
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:26px; width:100%; max-width:1000px; animation:fdUp 1s 0.3s ease both; }
+
+    .card {
+      position:relative; border-radius:24px; overflow:hidden;
+      background:var(--glass); border:1px solid var(--glass-border);
+      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      transition:transform 0.35s cubic-bezier(.22,.61,.36,1), box-shadow 0.35s, border-color 0.35s;
+      cursor:pointer;
+    }
+    .card:hover { transform:translateY(-10px) scale(1.01); }
+    .card-1:hover { border-color:rgba(34,197,94,0.5); box-shadow:0 28px 65px rgba(34,197,94,0.15); }
+    .card-2:hover { border-color:rgba(168,85,247,0.5); box-shadow:0 28px 65px rgba(168,85,247,0.15); }
+    .card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:24px 24px 0 0; }
+    .card-1::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
+    .card-2::before { background:linear-gradient(90deg,var(--purple),var(--orange)); }
+
+    .card-glow { position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; filter:blur(60px); opacity:0.16; pointer-events:none; }
+    .card-1 .card-glow { background:var(--green); }
+    .card-2 .card-glow { background:var(--purple); }
+
+    .card-body { position:relative; padding:36px; z-index:1; }
+
+    .card-icon { width:62px; height:62px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:2rem; margin-bottom:22px; }
+    .card-1 .card-icon { background:linear-gradient(135deg,rgba(34,197,94,0.18),rgba(20,184,166,0.18)); border:1px solid rgba(34,197,94,0.3); box-shadow:0 0 28px rgba(34,197,94,0.14); }
+    .card-2 .card-icon { background:linear-gradient(135deg,rgba(168,85,247,0.18),rgba(249,115,22,0.14)); border:1px solid rgba(168,85,247,0.3); box-shadow:0 0 28px rgba(168,85,247,0.14); }
+
+    .card-status { display:flex; align-items:center; gap:6px; font-size:0.76rem; font-weight:600; color:var(--muted); margin-bottom:14px; }
+    .card-status .cdot { width:7px; height:7px; border-radius:50%; background:#6b7280; transition:all 0.5s; }
+    .card-status.live { color:#86efac; } .card-status.live .cdot { background:var(--green); animation:pulse 1.4s infinite; }
+    .card-status.offline { color:#fca5a5; } .card-status.offline .cdot { background:#ef4444; }
+
+    .card h2 { font-size:1.5rem; font-weight:800; letter-spacing:-0.5px; margin-bottom:10px; }
+    .card p.desc { font-size:0.93rem; color:var(--muted); line-height:1.65; margin-bottom:24px; }
+
+    /* Sensor mini-cells */
+    #card-sensor-row { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:22px; }
+    #card-sensor-row.hidden { display:none; }
+    .s-cell { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.18); border-radius:10px; padding:9px 4px; text-align:center; }
+    .s-cell .sv { font-size:1rem; font-weight:700; color:#86efac; font-variant-numeric:tabular-nums; }
+    .s-cell .sl { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-top:2px; }
+
+    /* Pills */
+    .pills { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:28px; }
+    .pill { font-size:0.74rem; font-weight:600; padding:5px 11px; border-radius:100px; letter-spacing:0.3px; }
+    .card-1 .pill { background:rgba(34,197,94,0.11); border:1px solid rgba(34,197,94,0.23); color:#86efac; }
+    .card-2 .pill { background:rgba(168,85,247,0.11); border:1px solid rgba(168,85,247,0.23); color:#d8b4fe; }
+
+    /* Launch buttons */
+    .launch-btn {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      width:100%; padding:15px 24px; border-radius:13px;
+      font-size:0.98rem; font-weight:700; letter-spacing:0.3px;
+      text-decoration:none; color:#fff; border:none; cursor:pointer;
+      transition:opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      position:relative; overflow:hidden;
+    }
+    .launch-btn:hover { transform:scale(1.02); }
+    .launch-btn:active { transform:scale(0.98); }
+    .btn-green  { background:linear-gradient(135deg,#16a34a,#0d9488); box-shadow:0 8px 30px rgba(22,163,74,0.35); }
+    .btn-purple { background:linear-gradient(135deg,#9333ea,#ea580c); box-shadow:0 8px 30px rgba(147,51,234,0.35); }
+    .btn-arrow { display:inline-block; transition:transform 0.2s; }
+    .launch-btn:hover .btn-arrow { transform:translateX(4px); }
+
+    /* STATS */
+    .stats-row { display:flex; gap:16px; width:100%; max-width:1000px; margin-top:26px; animation:fdUp 1s 0.5s ease both; }
+    .stat-item { flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:20px; text-align:center; backdrop-filter:blur(10px); }
+    .stat-num  { font-size:1.9rem; font-weight:800; letter-spacing:-1px; }
+    .stat-label{ font-size:0.78rem; color:var(--muted); font-weight:500; margin-top:4px; }
+    .stat-item:nth-child(1) .stat-num { color:var(--green); }
+    .stat-item:nth-child(2) .stat-num { color:var(--sky); }
+    .stat-item:nth-child(3) .stat-num { color:var(--purple); }
+
+    /* FOOTER */
+    footer { margin-top:60px; text-align:center; color:var(--muted); font-size:0.82rem; animation:fdUp 1s 0.6s ease both; }
+    footer a { color:var(--green); text-decoration:none; }
+
+    @media (max-width:680px) {
+      .cards-grid { grid-template-columns:1fr; }
+      .stats-row  { flex-wrap:wrap; }
+      .stat-item  { min-width:calc(50% - 8px); }
+      #sensor-strip { display:none; }
+      #card-sensor-row { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="wrapper">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a href="#" class="nav-logo">
+        <div class="logo-icon">🌱</div>
+        <span>AgroAI Hub</span>
+      </a>
+      <div class="nav-right">
+        <div id="sensor-strip" class="hidden">
+          <span class="sv" id="nav-temp">—</span>
+          <span class="sv" id="nav-hum">—</span>
+          <span class="sv" id="nav-moist">—</span>
+          <span class="sv" id="nav-ph">—</span>
+        </div>
+        <div id="udp-badge">
+          <div class="dot"></div>
+          <span id="udp-label">Checking…</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-tag">
+        <div class="tdot"></div>
+        Smart Efficient Farming Platform
+      </div>
+      <h1>AI-Powered<br/><span class="grad">AgriTech Dashboard</span></h1>
+      <p>Real-time ESP32 sensor monitoring, soil health prediction,<br/>and plant disease detection — all in one place.</p>
+    </section>
+
+    <!-- TWO CARDS -->
+    <div class="cards-grid">
+
+      <!-- Card 1: Smart Farming AI -->
+      <div class="card card-1" id="card-farming">
+        <div class="card-glow"></div>
+        <div class="card-body">
+          <div class="card-icon">🌾</div>
+          <div class="card-status offline" id="farming-status">
+            <div class="cdot"></div>
+            <span id="farming-status-txt">Connecting to backend…</span>
+          </div>
+          <h2>Smart Farming AI</h2>
+          <p class="desc">
+            Live ESP32 telemetry via UDP — temperature, humidity, soil moisture, NPK and pH —
+            processed by XGBoost AI for instant crop health predictions.
+          </p>
+
+          <!-- Live sensor mini-cells -->
+          <div id="card-sensor-row" class="hidden">
+            <div class="s-cell"><div class="sv" id="sc-temp">—</div><div class="sl">Temp °C</div></div>
+            <div class="s-cell"><div class="sv" id="sc-hum">—</div><div class="sl">Hum %</div></div>
+            <div class="s-cell"><div class="sv" id="sc-moist">—</div><div class="sl">Moist %</div></div>
+            <div class="s-cell"><div class="sv" id="sc-ph">—</div><div class="sl">pH</div></div>
+          </div>
+
+          <div class="pills">
+            <span class="pill">📡 ESP32 UDP Live</span>
+            <span class="pill">🤖 XGBoost AI</span>
+            <span class="pill">🧪 NPK Sensor</span>
+            <span class="pill">🌡️ DHT22</span>
+          </div>
+          <a class="launch-btn btn-green" href="http://127.0.0.1:5000" target="_blank">
+            Open Smart Farming Dashboard <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: Plant Disease -->
+      <div class="card card-2" id="card-disease">
+        <div class="card-glow"></div>
+        <div class="card-body">
+          <div class="card-icon">🔬</div>
+          <div class="card-status" id="disease-status">
+            <div class="cdot"></div>
+            <span id="disease-status-txt">Checking server…</span>
+          </div>
+          <h2>Plant Disease Detection</h2>
+          <p class="desc">
+            Upload or stream a live camera feed to detect plant diseases using
+            Roboflow vision models — then get detailed treatment advice from Google Gemini AI.
+          </p>
+          <div class="pills">
+            <span class="pill">📷 Live Camera</span>
+            <span class="pill">🦠 Disease Detection</span>
+            <span class="pill">✨ Gemini AI Advice</span>
+            <span class="pill">🍅 Papaya & More</span>
+          </div>
+          <a class="launch-btn btn-purple" href="http://127.0.0.1:7000" target="_blank">
+            Open Plant Disease Detector <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-packets">—</div>
+        <div class="stat-label">Sensor Polls Since Load</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-temp">—</div>
+        <div class="stat-label">Current Temperature (°C)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-pred">—</div>
+        <div class="stat-label">AI Soil Prediction</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 Smart Efficient Farming &nbsp;·&nbsp; AgroAI Hub &nbsp;·&nbsp;
+        <a href="http://127.0.0.1:5000">Sensor Dashboard</a> &nbsp;·&nbsp;
+        <a href="http://127.0.0.1:7000">Plant Disease</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    let pollCount = 0;
+
+    async function pollFarming() {
+      try {
+        const res  = await fetch('/data', { cache: 'no-store', signal: AbortSignal.timeout(3000) });
+        const data = await res.json();
+        const live = !!data.is_live;
+
+        // UDP badge
+        const badge = document.getElementById('udp-badge');
+        badge.className = live ? 'live' : 'offline';
+        document.getElementById('udp-label').textContent = live ? 'ESP32 Live' : 'ESP32 Offline';
+
+        // Card 1 status
+        const cs  = document.getElementById('farming-status');
+        const cst = document.getElementById('farming-status-txt');
+        cs.className = 'card-status ' + (live ? 'live' : 'offline');
+        cst.textContent = live
+          ? `Live · ${data.prediction || '—'} (${(data.confidence || 0).toFixed(1)}%)`
+          : 'Backend online — awaiting ESP32 data on port 4210';
+
+        // Sensor cells
+        const srow  = document.getElementById('card-sensor-row');
+        const strip = document.getElementById('sensor-strip');
+        if (data.temp !== undefined && data.temp !== 0) {
+          srow.classList.remove('hidden');
+          strip.classList.remove('hidden');
+          setText('sc-temp',  (data.temp   || 0).toFixed(1) + '°');
+          setText('sc-hum',   (data.hum    || 0).toFixed(1) + '%');
+          setText('sc-moist', (data.moisture || 0) + '%');
+          setText('sc-ph',    (data.pH     || 7).toFixed(2));
+          setText('nav-temp',  '🌡 ' + (data.temp  || '—') + '°C');
+          setText('nav-hum',   '💧' + (data.hum   || '—') + '%');
+          setText('nav-moist', '🌱' + (data.moisture || '—') + '%');
+          setText('nav-ph',    'pH ' + (data.pH || '—'));
+        } else {
+          srow.classList.add('hidden');
+          strip.classList.add('hidden');
+        }
+
+        // Stats row
+        pollCount++;
+        setText('stat-packets', pollCount);
+        setText('stat-temp', live ? (data.temp || '—') : '—');
+        setText('stat-pred',  live ? shortPred(data.prediction) : '—');
+
+      } catch (e) {
+        document.getElementById('udp-badge').className = 'offline';
+        document.getElementById('udp-label').textContent = 'Backend Offline';
+        document.getElementById('farming-status').className = 'card-status offline';
+        document.getElementById('farming-status-txt').textContent = 'Server not running — start main.py on port 5000';
+        document.getElementById('card-sensor-row').classList.add('hidden');
+        document.getElementById('sensor-strip').classList.add('hidden');
+      }
+    }
+
+    async function pollDisease() {
+      try {
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 2500);
+        const res = await fetch('http://127.0.0.1:7000/', { signal: ctrl.signal, mode: 'no-cors' });
+        document.getElementById('disease-status').className = 'card-status live';
+        document.getElementById('disease-status-txt').textContent = 'Server Online — Ready';
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          document.getElementById('disease-status').className = 'card-status live';
+          document.getElementById('disease-status-txt').textContent = 'Server Online — Ready';
+        } else {
+          document.getElementById('disease-status').className = 'card-status offline';
+          document.getElementById('disease-status-txt').textContent = 'Offline — start app.py on port 7000';
+        }
+      }
+    }
+
+    function setText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = (val !== undefined && val !== null) ? val : '—';
+    }
+
+    function shortPred(pred) {
+      if (!pred || pred === 'Waiting') return '—';
+      return pred.split(' ').slice(0, 2).join(' ');
+    }
+
+    pollFarming();
+    pollDisease();
+    setInterval(pollFarming,  2500);
+    setInterval(pollDisease,  6000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+0 Apple___Apple_scab
+1 Blueberry___healthy
+2 Cherry_(including_sour)___Powdery_mildew
+3 Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+4 Grape___Black_rot
+5 Grape___Esca_(Black_Measles)
+6 Grape___healthy
+7 Grape___Leaf_blight_(Isariopsis_Leaf_Spot)
+8 Strawberry___healthy
+9 Strawberry___Leaf_scorch

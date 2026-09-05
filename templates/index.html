@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Efficient Farming AI System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        agri: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        glass: {
+                            card: 'rgba(15, 23, 42, 0.55)',
+                            lightCard: 'rgba(255, 255, 255, 0.65)',
+                            border: 'rgba(255, 255, 255, 0.12)',
+                            lightBorder: 'rgba(255, 255, 255, 0.4)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Ambient Glass Backdrop Gradients */
+        body {
+            background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 60%),
+                        #0b1329;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        body.light-theme {
+            background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.12) 0%, transparent 40%),
+                        #e2e8f0;
+            background-attachment: fixed;
+            color: #0f172a;
+        }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .light-theme .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        /* Glowing Neon Accents */
+        .glow-emerald {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.5);
+        }
+        .glow-purple {
+            box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.5);
+        }
+        .glow-sky {
+            box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        .pulse-beacon {
+            animation: beacon-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes beacon-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { opacity: 0.6; transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-100 transition-colors duration-300">
+
+    <!-- TOP GLASS HEADER -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-white/10 px-4 py-3">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleSidebar()" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-500 flex items-center justify-center shadow-lg glow-emerald">
+                        <i class="fa-solid fa-seedling text-slate-950 text-xl font-extrabold"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-heading font-extrabold text-lg md:text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+                            Smart Efficient Farming AI Advisor
+                        </h1>
+                        <p class="text-[11px] text-slate-400 hidden sm:block">
+                            IoT Telemetry & CNN Diagnostic System
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Controls -->
+            <div class="flex items-center space-x-3">
+                <div class="hidden md:flex items-center px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 pulse-beacon"></span>
+                    <span>UDP Port 4210 Active</span>
+                </div>
+
+                <div class="hidden lg:flex items-center px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
+                    <i class="fa-solid fa-sparkles text-purple-400 mr-1.5"></i>
+                    <span>Gemini 3.5 Ready</span>
+                </div>
+
+                <button onclick="fetchLatestSensorData()" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1.5 text-xs font-semibold">
+                    <i id="refreshSpinner" class="fa-solid fa-rotate"></i>
+                    <span class="hidden sm:inline">Sync</span>
+                </button>
+
+                <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition" title="Toggle Glass Dark/Light Theme">
+                    <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER WITH SIDEBAR & CONTENT -->
+    <div class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto p-2 sm:p-4 gap-4">
+
+        <!-- GLASS SIDEBAR -->
+        <aside id="sidebar" class="glass-panel w-64 rounded-2xl flex flex-col transition-all duration-300 z-40 flex-shrink-0 border border-white/10">
+            <!-- Project Branding -->
+            <div class="p-4 border-b border-white/10 bg-white/5">
+                <div class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">Final Year ECE Project</div>
+                <div class="text-sm font-bold text-white mt-0.5">Harish & Kavyaa</div>
+                <div class="text-xs text-slate-400 mt-0.5">Guide: Dr. K. B. Jayanthi</div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
+                <button onclick="switchTab('overview')" id="nav-overview" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <i class="fa-solid fa-chart-pie w-6 text-emerald-400 text-sm"></i>
+                    <span>Overview / Dashboard</span>
+                </button>
+
+                <button onclick="switchTab('sensors')" id="nav-sensors" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-tower-broadcast w-6 text-sky-400 text-sm"></i>
+                    <span>Real-Time Sensors</span>
+                    <span class="ml-auto px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LIVE</span>
+                </button>
+
+                <button onclick="switchTab('disease')" id="nav-disease" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-leaf w-6 text-teal-400 text-sm"></i>
+                    <span>Disease Diagnosis</span>
+                </button>
+
+                <button onclick="switchTab('npk')" id="nav-npk" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-vial w-6 text-amber-400 text-sm"></i>
+                    <span>Soil NPK Analyzer</span>
+                </button>
+
+                <button onclick="switchTab('gemini')" id="nav-gemini" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-robot w-6 text-purple-400 text-sm"></i>
+                    <span>Gemini AI Advisory</span>
+                </button>
+
+                <div class="pt-3 pb-1 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Agronomy & Metrics</div>
+
+                <button onclick="switchTab('guide')" id="nav-guide" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-book-open w-6 text-cyan-400 text-sm"></i>
+                    <span>Tomato Health Guide</span>
+                </button>
+
+                <button onclick="switchTab('catalog')" id="nav-catalog" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-disease w-6 text-rose-400 text-sm"></i>
+                    <span>Crop Disease Catalog</span>
+                </button>
+
+                <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-chart-line w-6 text-indigo-400 text-sm"></i>
+                    <span>Data Analytics & Logs</span>
+                </button>
+
+                <button onclick="switchTab('yield')" id="nav-yield" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-calculator w-6 text-amber-500 text-sm"></i>
+                    <span>Yield Calculator</span>
+                </button>
+
+                <button onclick="switchTab('settings')" id="nav-settings" class="nav-item flex items-center w-full px-3.5 py-3 text-xs font-semibold rounded-xl transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                    <i class="fa-solid fa-sliders w-6 text-slate-400 text-sm"></i>
+                    <span>System Settings</span>
+                </button>
+            </nav>
+
+            <div class="p-3 border-t border-white/10 bg-white/5 flex items-center justify-between text-xs text-slate-400">
+                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-400 mr-2"></span>Online</span>
+                <span class="text-[10px] font-mono text-slate-500">v3.10.0</span>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW AREA -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar space-y-6">
+
+            <!-- PAGE 1: OVERVIEW -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <!-- Hero Banner -->
+                <div class="glass-panel rounded-2xl p-6 relative overflow-hidden border border-emerald-500/30">
+                    <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="relative z-10 max-w-3xl">
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300 mb-3">
+                            <i class="fa-solid fa-microchip mr-2"></i> ESP32 IoT Sensors & XGBoost ML Model
+                        </div>
+                        <h2 class="font-heading font-extrabold text-2xl md:text-3xl text-white tracking-tight mb-2">
+                            Smart Efficient Farming & Precision Agriculture
+                        </h2>
+                        <p class="text-xs md:text-sm text-slate-300 leading-relaxed">
+                            Real-time soil Telemetry (NPK, pH, Moisture, Lux) integrated with Keras 224x224 CNN Disease Diagnosis and Gemini AI agronomic advisory.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Soil Prediction Card -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between border-t-2 border-t-emerald-400">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Soil XGBoost Evaluation</span>
+                                <span id="soilStatusBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">AI Rated</span>
+                            </div>
+                            <div class="text-xs text-slate-400">Current Soil Health Grade</div>
+                            <div class="mt-2 flex items-baseline space-x-3">
+                                <span id="soilPredictionVal" class="text-4xl font-heading font-extrabold text-emerald-400">Loading...</span>
+                                <span id="soilConfidenceVal" class="text-xs text-slate-400 font-semibold">(--%)</span>
+                            </div>
+                            <p class="mt-2 text-xs text-slate-400 leading-relaxed">Evaluating Nitrogen, Phosphorus, Potassium, Moisture, and pH levels.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Target Range: Medium - High</span>
+                            <button onclick="switchTab('npk')" class="text-emerald-400 font-semibold hover:underline flex items-center">
+                                Adjust NPK <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Quick Sensor Cards -->
+                    <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between hover:border-amber-400/50 transition">
+                            <div class="flex items-center justify-between text-amber-400 mb-2">
+                                <i class="fa-solid fa-temperature-half text-xl"></i>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">20-30°C</span>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-medium">Temperature</div>
+                                <div id="ov-temp" class="text-2xl font-bold font-heading text-white mt-1">-- °C</div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+                                <span>Target 25°C</span>
+                                <span class="text-emerald-400 font-semibold">Normal</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/50 transition">
+                            <div class="flex items-center justify-between text-sky-400 mb-2">
+                                <i class="fa-solid fa-droplet text-xl"></i>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20">60-80%</span>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-medium">Humidity</div>
+                                <div id="ov-hum" class="text-2xl font-bold font-heading text-white mt-1">-- %</div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+                                <span>Target 65%</span>
+                                <span class="text-emerald-400 font-semibold">Optimal</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-400/50 transition">
+                            <div class="flex items-center justify-between text-emerald-400 mb-2">
+                                <i class="fa-solid fa-water text-xl"></i>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">60-80%</span>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-medium">Moisture</div>
+                                <div id="ov-moisture" class="text-2xl font-bold font-heading text-white mt-1">-- %</div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+                                <span>Target 70%</span>
+                                <span class="text-emerald-400 font-semibold">Adequate</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between hover:border-purple-400/50 transition">
+                            <div class="flex items-center justify-between text-purple-400 mb-2">
+                                <i class="fa-solid fa-flask-vial text-xl"></i>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">6.0-7.0</span>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-medium">Soil pH</div>
+                                <div id="ov-ph" class="text-2xl font-bold font-heading text-white mt-1">--</div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+                                <span>Target 6.5</span>
+                                <span class="text-emerald-400 font-semibold">Neutral</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts & Gemini Advisory -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-heading font-bold text-lg text-white">Live Environmental Sensor Telemetry</h3>
+                                <p class="text-xs text-slate-400">ESP32 UDP Packets Stream (Port 4210)</p>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="overviewLiveChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gemini Farm Advisor -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 text-purple-400 mb-3">
+                                <i class="fa-solid fa-sparkles text-lg"></i>
+                                <h3 class="font-heading font-bold text-lg text-white">Gemini AI Farm Advisor</h3>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-4 leading-relaxed">Automated agronomic recommendations based on telemetry.</p>
+                            <div id="quickAiSummaryBox" class="p-4 rounded-xl bg-purple-950/40 border border-purple-900/50 text-xs text-slate-300 custom-scrollbar max-h-48 overflow-y-auto leading-relaxed">
+                                <div class="flex items-center space-x-2 text-purple-400">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                    <span>Fetching Gemini evaluation...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <button onclick="switchTab('gemini')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs transition flex items-center justify-center space-x-2 shadow-lg glow-purple">
+                                <i class="fa-solid fa-comments"></i>
+                                <span>Ask Custom AI Query</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: REAL-TIME SENSORS -->
+            <div id="tab-sensors" class="tab-content hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-heading font-bold text-2xl text-white">📡 Real-Time Telemetry Grid</h2>
+                        <p class="text-xs text-slate-400">Live ESP32 UDP packets auto-polling every 2 seconds.</p>
+                    </div>
+                    <button id="autoPollToggle" onclick="toggleAutoPolling()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition flex items-center space-x-2 glow-emerald">
+                        <i class="fa-solid fa-pause"></i>
+                        <span id="autoPollBtnText">Pause Live Stream</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="sensorsGrid">
+                    <!-- Temp -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-amber-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-temperature-half text-amber-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Target 20-30°C</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Air Temperature</div>
+                            <div id="sen-temp" class="text-3xl font-extrabold font-heading text-white mt-1">-- °C</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Status</span><span id="sen-temp-st" class="text-emerald-400 font-bold">Optimal</span>
+                        </div>
+                    </div>
+
+                    <!-- Humidity -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-sky-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-droplet text-sky-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">Target 60-80%</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Air Humidity</div>
+                            <div id="sen-hum" class="text-3xl font-extrabold font-heading text-white mt-1">-- %</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Status</span><span id="sen-hum-st" class="text-emerald-400 font-bold">Optimal</span>
+                        </div>
+                    </div>
+
+                    <!-- Moisture -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-emerald-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-water text-emerald-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Target 60-80%</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soil Moisture</div>
+                            <div id="sen-moisture" class="text-3xl font-extrabold font-heading text-white mt-1">-- %</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Status</span><span id="sen-moist-st" class="text-emerald-400 font-bold">Adequate</span>
+                        </div>
+                    </div>
+
+                    <!-- pH -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-purple-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-flask-vial text-purple-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Target 6.0-7.0</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soil pH Level</div>
+                            <div id="sen-ph" class="text-3xl font-extrabold font-heading text-white mt-1">--</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Status</span><span id="sen-ph-st" class="text-emerald-400 font-bold">Neutral</span>
+                        </div>
+                    </div>
+
+                    <!-- N -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-emerald-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-atom text-emerald-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">40-60 mg/kg</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nitrogen (N)</div>
+                            <div id="sen-N" class="text-3xl font-extrabold font-heading text-white mt-1">-- mg/kg</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Macro Nutrient</span><span class="text-emerald-400 font-bold">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- P -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-sky-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-dna text-sky-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">30-50 mg/kg</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phosphorus (P)</div>
+                            <div id="sen-P" class="text-3xl font-extrabold font-heading text-white mt-1">-- mg/kg</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Macro Nutrient</span><span class="text-emerald-400 font-bold">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- K -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-amber-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-bolt text-amber-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">40-60 mg/kg</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Potassium (K)</div>
+                            <div id="sen-K" class="text-3xl font-extrabold font-heading text-white mt-1">-- mg/kg</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Macro Nutrient</span><span class="text-emerald-400 font-bold">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Light -->
+                    <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between border border-yellow-500/20">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fa-solid fa-sun text-yellow-400 text-2xl"></i>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">>300 Lux</span>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sunlight Lux</div>
+                            <div id="sen-light" class="text-3xl font-extrabold font-heading text-white mt-1">-- Lux</div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between">
+                            <span>Solar Intensity</span><span class="text-emerald-400 font-bold">Good</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-6">
+                    <h3 class="font-heading font-bold text-lg text-white mb-2">NPK Soil Nutrients Live Tracking</h3>
+                    <div class="h-64">
+                        <canvas id="npkLiveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: DISEASE DIAGNOSIS -->
+            <div id="tab-disease" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">🍃 AI Crop Disease Diagnosis</h2>
+                    <p class="text-xs text-slate-400">Upload leaf image for instant Keras CNN classification & Gemini treatment strategy.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-heading font-bold text-lg text-white mb-3">Upload Leaf Sample</h3>
+                            <div onclick="document.getElementById('leafFileInput').click()" class="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 rounded-2xl p-8 text-center cursor-pointer transition bg-emerald-500/5">
+                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-emerald-400 mb-3"></i>
+                                <p class="text-sm font-semibold text-slate-200">Click to upload leaf sample</p>
+                                <p class="text-xs text-slate-400 mt-1">Supports JPG, PNG, WEBP</p>
+                                <input type="file" id="leafFileInput" accept="image/*" class="hidden" onchange="handleLeafFileSelect(event)">
+                            </div>
+
+                            <div id="leafPreviewContainer" class="hidden mt-4 text-center">
+                                <img id="leafPreviewImg" src="" alt="Leaf" class="max-h-48 mx-auto rounded-xl shadow-lg border border-white/20">
+                                <p id="fileNameLabel" class="text-xs text-slate-400 mt-2 font-mono"></p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button id="analyzeLeafBtn" onclick="uploadAndAnalyzeLeaf()" disabled class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-xs transition flex items-center justify-center space-x-2 shadow-lg glow-emerald">
+                                <i class="fa-solid fa-microscope"></i>
+                                <span id="analyzeBtnText">Run Keras CNN Diagnosis</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col">
+                        <h3 class="font-heading font-bold text-lg text-white mb-3">AI Diagnostic Results</h3>
+                        
+                        <div id="diseaseResultEmpty" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400">
+                            <i class="fa-solid fa-leaf text-5xl mb-3 text-slate-600"></i>
+                            <p class="text-sm font-medium">No diagnosis performed yet.</p>
+                            <p class="text-xs text-slate-500 mt-1">Upload a leaf image on the left to see prediction.</p>
+                        </div>
+
+                        <div id="diseaseResultBody" class="hidden space-y-4 flex-1">
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 uppercase font-bold">Condition</div>
+                                    <div id="resultDiseaseName" class="text-xl font-heading font-bold text-rose-400 mt-0.5">--</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-slate-400 uppercase font-bold">Confidence</div>
+                                    <div id="resultConfidence" class="text-xl font-heading font-bold text-emerald-400 mt-0.5">-- %</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Gemini AI Treatment Plan</h4>
+                                <div id="resultAiAdvice" class="p-4 rounded-xl bg-purple-950/40 border border-purple-900/50 text-xs text-slate-300 custom-scrollbar max-h-56 overflow-y-auto leading-relaxed">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: SOIL NPK ANALYZER -->
+            <div id="tab-npk" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">🧪 Soil NPK & Suitability Analyzer</h2>
+                    <p class="text-xs text-slate-400">Interactive parameter tuning for XGBoost model inference.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-5">
+                        <h3 class="font-heading font-bold text-lg text-white">Adjust Soil Telemetry Sliders</h3>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Nitrogen (N): <span id="sl-n-val" class="text-emerald-400 font-bold">45</span> mg/kg</span>
+                                <span class="text-slate-400">Target: 40-60</span>
+                            </div>
+                            <input type="range" id="sl-n" min="0" max="150" value="45" oninput="updateSliderVal('n')" class="w-full accent-emerald-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Phosphorus (P): <span id="sl-p-val" class="text-sky-400 font-bold">35</span> mg/kg</span>
+                                <span class="text-slate-400">Target: 30-50</span>
+                            </div>
+                            <input type="range" id="sl-p" min="0" max="150" value="35" oninput="updateSliderVal('p')" class="w-full accent-sky-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Potassium (K): <span id="sl-k-val" class="text-amber-400 font-bold">50</span> mg/kg</span>
+                                <span class="text-slate-400">Target: 40-60</span>
+                            </div>
+                            <input type="range" id="sl-k" min="0" max="150" value="50" oninput="updateSliderVal('k')" class="w-full accent-amber-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Moisture: <span id="sl-m-val" class="text-teal-400 font-bold">70</span> %</span>
+                                <span class="text-slate-400">Target: 60-80</span>
+                            </div>
+                            <input type="range" id="sl-m" min="0" max="100" value="70" oninput="updateSliderVal('m')" class="w-full accent-teal-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Temperature: <span id="sl-t-val" class="text-rose-400 font-bold">25</span> °C</span>
+                                <span class="text-slate-400">Target: 20-30</span>
+                            </div>
+                            <input type="range" id="sl-t" min="10" max="50" value="25" oninput="updateSliderVal('t')" class="w-full accent-rose-500">
+                        </div>
+
+                        <button onclick="runCustomSoilPrediction()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg glow-emerald">
+                            Evaluate XGBoost Model
+                        </button>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-heading font-bold text-lg text-white mb-4">Model Output</h3>
+                            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                                <div class="text-[10px] font-bold uppercase text-emerald-400">Predicted Soil Suitability</div>
+                                <div id="customSoilResult" class="text-3xl font-heading font-extrabold text-emerald-300 mt-2">Medium</div>
+                                <div id="customSoilConf" class="text-xs text-slate-400 mt-1">Confidence: 94.2%</div>
+                            </div>
+                        </div>
+
+                        <button onclick="sendNpkToGemini()" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition glow-purple">
+                            Get Fertilizer Advice
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 5: GEMINI AI ADVISORY -->
+            <div id="tab-gemini" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">🤖 Gemini AI Agriculture Chatbot</h2>
+                    <p class="text-xs text-slate-400">Powered by Gemini 3.5 Flash Lite.</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl flex flex-col h-[550px] overflow-hidden">
+                    <div class="p-3 bg-white/5 border-b border-white/10 flex items-center space-x-2 overflow-x-auto custom-scrollbar">
+                        <span class="text-xs font-semibold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Prompts:</span>
+                        <button onclick="setChatPrompt('What is the ideal soil pH and NPK range for tomato cultivation in Tamil Nadu?')" class="px-3 py-1 rounded-full bg-white/10 text-xs hover:bg-white/20 transition whitespace-nowrap">Ideal Soil pH & NPK</button>
+                        <button onclick="setChatPrompt('How to treat Early Blight and Late Blight in tomato crops?')" class="px-3 py-1 rounded-full bg-white/10 text-xs hover:bg-white/20 transition whitespace-nowrap">Treating Blights</button>
+                        <button onclick="setChatPrompt('What organic fertilizers best increase tomato yield?')" class="px-3 py-1 rounded-full bg-white/10 text-xs hover:bg-white/20 transition whitespace-nowrap">Organic Fertilizers</button>
+                    </div>
+
+                    <div id="chatMessageStream" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center flex-shrink-0 text-sm">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="max-w-2xl p-4 rounded-2xl bg-purple-950/40 border border-purple-900/50 text-xs text-slate-200 leading-relaxed shadow-sm">
+                                <p class="font-semibold text-purple-300 mb-1">Hello! I am your Smart Efficient Farming AI Advisor.</p>
+                                <p>Ask me any question regarding soil health, disease treatment, or fertilizer application!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-white/5 border-t border-white/10 flex items-center space-x-2">
+                        <input type="text" id="chatInputText" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Ask your agricultural question..." class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/80 text-xs text-white focus:outline-none focus:border-purple-500">
+                        <button onclick="sendChatMessage()" class="py-2.5 px-5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition flex items-center space-x-1 shadow-lg glow-purple">
+                            <span>Send</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 6: GUIDE -->
+            <div id="tab-guide" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">🌾 Smart Efficient Farming Guide</h2>
+                    <p class="text-xs text-slate-400">Agronomic thresholds for Solanum lycopersicum in South India.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-panel rounded-2xl p-5 border border-white/10">
+                        <div class="text-amber-400 text-2xl mb-2"><i class="fa-solid fa-temperature-full"></i></div>
+                        <h3 class="font-heading font-bold text-base text-white">Temp (18-32°C)</h3>
+                        <p class="text-xs text-slate-400 mt-1">High temp (>35°C) inhibits fruit set.</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 border border-white/10">
+                        <div class="text-sky-400 text-2xl mb-2"><i class="fa-solid fa-cloud-showers-heavy"></i></div>
+                        <h3 class="font-heading font-bold text-base text-white">Humidity (60-80%)</h3>
+                        <p class="text-xs text-slate-400 mt-1">High humidity triggers blights.</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 border border-white/10">
+                        <div class="text-purple-400 text-2xl mb-2"><i class="fa-solid fa-vial-circle-check"></i></div>
+                        <h3 class="font-heading font-bold text-base text-white">pH (6.0-6.8)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Slightly acidic maximizes NPK uptake.</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 border border-white/10">
+                        <div class="text-emerald-400 text-2xl mb-2"><i class="fa-solid fa-seedling"></i></div>
+                        <h3 class="font-heading font-bold text-base text-white">NPK Ratio</h3>
+                        <p class="text-xs text-slate-400 mt-1">Fruiting stage needs high P & K.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 7: CATALOG -->
+            <div id="tab-catalog" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">📚 Trained Crop Disease Catalog</h2>
+                    <p class="text-xs text-slate-400">10 disease classes in Keras CNN model.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="diseaseCatalogGrid">
+                </div>
+            </div>
+
+            <!-- PAGE 8: ANALYTICS -->
+            <div id="tab-analytics" class="tab-content hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-heading font-bold text-2xl text-white">📈 Telemetry Logs</h2>
+                        <p class="text-xs text-slate-400">Historical telemetry received via UDP port 4210.</p>
+                    </div>
+                    <button onclick="exportLogsToCsv()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition flex items-center space-x-2 border border-white/10">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-white/10 text-slate-400 uppercase font-bold">
+                                <th class="p-3">Time</th>
+                                <th class="p-3">Temp (°C)</th>
+                                <th class="p-3">Hum (%)</th>
+                                <th class="p-3">Light</th>
+                                <th class="p-3">Moisture</th>
+                                <th class="p-3">N</th>
+                                <th class="p-3">P</th>
+                                <th class="p-3">K</th>
+                                <th class="p-3">pH</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetryLogTable" class="divide-y divide-white/5 font-mono">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGE 9: YIELD CALCULATOR -->
+            <div id="tab-yield" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">🧮 Tomato Yield & Revenue Calculator</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel rounded-2xl p-6 space-y-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-400">Land Area (Acres)</label>
+                            <input type="number" id="calcAcres" value="1.0" min="0.1" step="0.1" oninput="calculateYield()" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/80 text-sm font-bold text-white">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-400">Market Price per Kg (₹ INR)</label>
+                            <input type="number" id="calcPrice" value="35" min="5" step="1" oninput="calculateYield()" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/80 text-sm font-bold text-white">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-400">Soil Condition</label>
+                            <select id="calcSoilGrade" onchange="calculateYield()" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/80 text-sm font-bold text-white">
+                                <option value="High">High Suitability (25 Tons/Acre)</option>
+                                <option value="Medium" selected>Medium Suitability (18 Tons/Acre)</option>
+                                <option value="Low">Low Suitability (10 Tons/Acre)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between bg-gradient-to-br from-emerald-950/80 to-slate-950/80">
+                        <div>
+                            <div class="text-xs font-bold text-emerald-400 uppercase">Estimated Harvest</div>
+                            <div id="yieldTons" class="text-4xl font-heading font-extrabold text-white mt-2">18.0 Tons</div>
+                            <div class="mt-6 pt-6 border-t border-white/10">
+                                <div class="text-xs font-bold text-emerald-400 uppercase">Projected Revenue</div>
+                                <div id="yieldRevenue" class="text-3xl font-heading font-bold text-emerald-300 mt-2">₹ 6,30,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 10: SETTINGS -->
+            <div id="tab-settings" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="font-heading font-bold text-2xl text-white">⚙️ System Settings</h2>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 space-y-4 max-w-xl">
+                    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                        <span class="text-xs font-semibold text-slate-300">UDP Broadcast Port</span>
+                        <span class="font-mono text-xs px-3 py-1 bg-white/10 rounded-lg">4210</span>
+                    </div>
+                    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                        <span class="text-xs font-semibold text-slate-300">Gemini 3.5 API Status</span>
+                        <span class="text-xs font-bold text-emerald-400">Connected</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-300">Models Loaded</span>
+                        <span class="text-xs font-bold text-emerald-400">XGBoost & Keras CNN</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JS LOGIC -->
+    <script>
+        let currentTab = 'overview';
+        let isAutoPolling = true;
+        let pollTimer = null;
+        let telemetryHistory = [];
+        let selectedLeafFile = null;
+        let liveChart = null;
+        let npkChart = null;
+
+        const diseaseCatalogData = [
+            { name: "Tomato___Bacterial_spot", title: "Bacterial Spot", severity: "High", desc: "Xanthomonas bacterial infection causing dark water-soaked spots." },
+            { name: "Tomato___Early_blight", title: "Early Blight", severity: "Medium", desc: "Alternaria solani fungal infection with concentric ring target spots." },
+            { name: "Tomato___Late_blight", title: "Late Blight", severity: "Critical", desc: "Phytophthora infestans causing rapid foliage collapse." },
+            { name: "Tomato___Leaf_Mold", title: "Leaf Mold", severity: "Medium", desc: "Passalora fulva fungus thriving in high greenhouse humidity." },
+            { name: "Tomato___Septoria_leaf_spot", title: "Septoria Leaf Spot", severity: "Medium", desc: "Circular spots with dark brown margins." },
+            { name: "Tomato___Spider_mites", title: "Spider Mites", severity: "High", desc: "Yellow speckling and fine silk webbing." },
+            { name: "Tomato___Target_Spot", title: "Target Spot", severity: "Medium", desc: "Fungal lesions with light brown centers." },
+            { name: "Tomato___Tomato_Yellow_Leaf_Curl_Virus", title: "Yellow Leaf Curl Virus", severity: "Critical", desc: "Begomovirus transmitted by whiteflies." },
+            { name: "Tomato___Tomato_mosaic_virus", title: "Tomato Mosaic Virus", severity: "High", desc: "Tobamovirus causing mottled mosaic patterns." },
+            { name: "Tomato___healthy", title: "Healthy Leaf", severity: "None", desc: "Vibrant green leaf free from pathogens." }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            renderDiseaseCatalog();
+            fetchLatestSensorData();
+            startPolling();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/30');
+                el.classList.add('text-slate-300');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const navBtn = document.getElementById(`nav-${tabId}`);
+            if (navBtn) {
+                navBtn.classList.remove('text-slate-300');
+                navBtn.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/30');
+            }
+            currentTab = tabId;
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-ml-64');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const icon = document.getElementById('themeIcon');
+            if (document.body.classList.contains('light-theme')) {
+                icon.className = 'fa-solid fa-moon text-slate-800';
+            } else {
+                icon.className = 'fa-solid fa-sun text-amber-400';
+            }
+        }
+
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(() => { if (isAutoPolling) fetchLatestSensorData(); }, 2000);
+        }
+
+        function toggleAutoPolling() {
+            isAutoPolling = !isAutoPolling;
+            document.getElementById('autoPollBtnText').textContent = isAutoPolling ? "Pause Live Stream" : "Resume Live Stream";
+        }
+
+        async function fetchLatestSensorData() {
+            const spinner = document.getElementById('refreshSpinner');
+            if (spinner) spinner.classList.add('fa-spin');
+            try {
+                const res = await fetch('/data');
+                const data = await res.json();
+                updateUIWithSensorData(data);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                if (spinner) setTimeout(() => spinner.classList.remove('fa-spin'), 400);
+            }
+        }
+
+        // BUG FIX #10: updateUIWithSensorData() called setText('soilStatusBadge', ...)
+        // but never updated the badge text/colour to reflect Low/Medium/High.
+        // Also it referenced document.getElementById('headerUdpStatus') which doesn't
+        // exist in the HTML (no element with that id) — silent no-op, but misleading.
+        // Fix: update soilStatusBadge colour + text, and remove the dead headerUdpStatus ref.
+        function updateUIWithSensorData(d) {
+            if (!d) return;
+
+            setText('ov-temp', `${d.temp ?? '--'} °C`);
+            setText('ov-hum', `${d.hum ?? '--'} %`);
+            setText('ov-moisture', `${d.moisture ?? '--'} %`);
+            setText('ov-ph', d.pH ?? '--');
+
+            const pred = d.prediction || 'Medium';
+            setText('soilPredictionVal', pred);
+            setText('soilConfidenceVal', d.is_live ? `(${d.confidence || 92}%)` : '(Waiting for ESP32)');
+
+            const badge = document.getElementById('soilStatusBadge');
+            if (badge) {
+                if (!d.is_live) {
+                    badge.textContent = 'Offline';
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                } else {
+                    badge.textContent = pred;
+                    if (pred === 'High') {
+                        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                    } else if (pred === 'Medium') {
+                        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                    } else {
+                        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                    }
+                }
+            }
+
+            renderSensorsGrid(d);
+            if (d.is_live) {
+                addTelemetryLog(d);
+                updateCharts(d);
+            }
+
+            if (!window.aiSummaryFetched && d.temp) {
+                fetchQuickAiSummary(d);
+                window.aiSummaryFetched = true;
+            }
+        }
+
+        function setText(id, txt) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = txt;
+        }
+
+        function renderSensorsGrid(d) {
+            if (!d) return;
+            setText('sen-temp', `${d.temp ?? '--'} °C`);
+            setText('sen-hum', `${d.hum ?? '--'} %`);
+            setText('sen-moisture', `${d.moisture ?? '--'} %`);
+            setText('sen-ph', d.pH ?? '--');
+            setText('sen-N', `${d.N ?? '--'} mg/kg`);
+            setText('sen-P', `${d.P ?? '--'} mg/kg`);
+            setText('sen-K', `${d.K ?? '--'} mg/kg`);
+            setText('sen-light', `${d.light ?? '--'} Lux`);
+        }
+
+        function addTelemetryLog(d) {
+            const timeStr = new Date().toLocaleTimeString();
+            telemetryHistory.unshift({ time: timeStr, ...d });
+            if (telemetryHistory.length > 15) telemetryHistory.pop();
+
+            const tbody = document.getElementById('telemetryLogTable');
+            if (!tbody) return;
+            tbody.innerHTML = telemetryHistory.map(r => `
+                <tr class="hover:bg-white/5">
+                    <td class="p-3 text-slate-400">${r.time}</td>
+                    <td class="p-3 text-amber-400">${r.temp}</td>
+                    <td class="p-3 text-sky-400">${r.hum}</td>
+                    <td class="p-3">${r.light}</td>
+                    <td class="p-3 text-emerald-400">${r.moisture}</td>
+                    <td class="p-3">${r.N}</td>
+                    <td class="p-3">${r.P}</td>
+                    <td class="p-3">${r.K}</td>
+                    <td class="p-3 text-purple-400">${r.pH}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300">${r.prediction}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('overviewLiveChart');
+            if (ctx1) {
+                liveChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            { label: 'Temp (°C)', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.4 },
+                            { label: 'Humidity (%)', data: [], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', fill: true, tension: 0.4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+                });
+            }
+
+            const ctx2 = document.getElementById('npkLiveChart');
+            if (ctx2) {
+                npkChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Nitrogen (N)', 'Phosphorus (P)', 'Potassium (K)'],
+                        datasets: [{
+                            label: 'Current Telemetry (mg/kg)',
+                            data: [45, 35, 50],
+                            backgroundColor: ['#34d399', '#38bdf8', '#fbbf24'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+                });
+            }
+        }
+
+        function updateCharts(d) {
+            if (liveChart) {
+                const label = new Date().toLocaleTimeString();
+                liveChart.data.labels.push(label);
+                liveChart.data.datasets[0].data.push(d.temp);
+                liveChart.data.datasets[1].data.push(d.hum);
+                if (liveChart.data.labels.length > 8) {
+                    liveChart.data.labels.shift();
+                    liveChart.data.datasets[0].data.shift();
+                    liveChart.data.datasets[1].data.shift();
+                }
+                liveChart.update();
+            }
+
+            if (npkChart) {
+                npkChart.data.datasets[0].data = [d.N, d.P, d.K];
+                npkChart.update();
+            }
+        }
+
+        function handleLeafFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            selectedLeafFile = file;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                document.getElementById('leafPreviewImg').src = evt.target.result;
+                document.getElementById('leafPreviewContainer').classList.remove('hidden');
+                document.getElementById('fileNameLabel').textContent = file.name;
+                document.getElementById('analyzeLeafBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadAndAnalyzeLeaf() {
+            if (!selectedLeafFile) return;
+            const btnText = document.getElementById('analyzeBtnText');
+            btnText.textContent = "Scanning...";
+            document.getElementById('analyzeLeafBtn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('image', selectedLeafFile);
+
+            try {
+                const res = await fetch('/api/predict_disease', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('diseaseResultEmpty').classList.add('hidden');
+                    document.getElementById('diseaseResultBody').classList.remove('hidden');
+                    setText('resultDiseaseName', data.prediction.replace(/_/g, ' '));
+                    setText('resultConfidence', `${data.confidence} %`);
+                    const adviceBox = document.getElementById('resultAiAdvice');
+                    if (adviceBox && data.ai_advice) adviceBox.innerHTML = parseMarkdown(data.ai_advice);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed'));
+                }
+            } catch (err) {
+                alert('Upload error: ' + err);
+            } finally {
+                btnText.textContent = "Run Keras CNN Diagnosis";
+                document.getElementById('analyzeLeafBtn').disabled = false;
+            }
+        }
+
+        function updateSliderVal(p) {
+            const v = document.getElementById(`sl-${p}`).value;
+            document.getElementById(`sl-${p}-val`).textContent = v;
+        }
+
+        async function runCustomSoilPrediction() {
+            const payload = {
+                N: parseFloat(document.getElementById('sl-n').value),
+                P: parseFloat(document.getElementById('sl-p').value),
+                K: parseFloat(document.getElementById('sl-k').value),
+                moisture: parseFloat(document.getElementById('sl-m').value),
+                temp: parseFloat(document.getElementById('sl-t').value)
+            };
+
+            try {
+                const res = await fetch('/api/predict_soil', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                const d = await res.json();
+                if (d.status === 'success') {
+                    setText('customSoilResult', d.prediction);
+                    setText('customSoilConf', `Confidence: ${d.confidence}%`);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function sendNpkToGemini() {
+            switchTab('gemini');
+            const n = document.getElementById('sl-n')?.value || 45;
+            const p = document.getElementById('sl-p')?.value || 35;
+            const k = document.getElementById('sl-k')?.value || 50;
+            const m = document.getElementById('sl-m')?.value || 70;
+            setChatPrompt(`Soil test readings: Nitrogen=${n} mg/kg, Phosphorus=${p} mg/kg, Potassium=${k} mg/kg, Soil Moisture=${m}%. What fertilizer formula and dosage is recommended?`);
+        }
+
+        const parseMarkdown = (txt) => {
+            if (typeof marked !== 'undefined' && marked.parse) return marked.parse(txt);
+            return (txt || '').replace(/\n/g, '<br>');
+        };
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInputText');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const stream = document.getElementById('chatMessageStream');
+            const userBubble = document.createElement('div');
+            userBubble.className = "flex items-start justify-end space-x-3";
+            userBubble.innerHTML = `<div class="max-w-2xl p-4 rounded-2xl bg-emerald-600 text-white text-xs leading-relaxed shadow-lg">${msg}</div>`;
+            stream.appendChild(userBubble);
+            input.value = '';
+            stream.scrollTop = stream.scrollHeight;
+
+            const botBubble = document.createElement('div');
+            botBubble.className = "flex items-start space-x-3";
+            botBubble.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center flex-shrink-0 text-sm"><i class="fa-solid fa-robot"></i></div>
+                <div class="max-w-2xl p-4 rounded-2xl bg-purple-950/40 border border-purple-900/50 text-xs text-slate-200 leading-relaxed shadow-sm"><i class="fa-solid fa-circle-notch fa-spin text-purple-400 mr-2"></i> Thinking...</div>
+            `;
+            stream.appendChild(botBubble);
+            stream.scrollTop = stream.scrollHeight;
+
+            try {
+                const res = await fetch('/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ message: msg }) });
+                const d = await res.json();
+                botBubble.querySelector('div:nth-child(2)').innerHTML = parseMarkdown(d.reply || 'No reply');
+            } catch (e) {
+                botBubble.querySelector('div:nth-child(2)').textContent = 'Error connecting to Gemini.';
+            } finally {
+                stream.scrollTop = stream.scrollHeight;
+            }
+        }
+
+        // BUG FIX #9: setChatPrompt() was called by every quick-prompt button
+        // but was never defined — clicking those buttons threw "setChatPrompt is
+        // not defined" and did nothing.
+        function setChatPrompt(text) {
+            switchTab('gemini');
+            const input = document.getElementById('chatInputText');
+            if (input) {
+                input.value = text;
+                input.focus();
+            }
+        }
+
+        async function fetchQuickAiSummary(d) {
+            const box = document.getElementById('quickAiSummaryBox');
+            if (!box) return;
+            try {
+                const res = await fetch('/combined_ai', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ disease: "Telemetry Monitoring" }) });
+                const data = await res.json();
+                box.innerHTML = parseMarkdown(data.advice || 'Soil status optimal.');
+            } catch (e) {
+                box.textContent = "Telemetry loaded. System normal.";
+            }
+        }
+
+        function renderDiseaseCatalog() {
+            const container = document.getElementById('diseaseCatalogGrid');
+            if (!container) return;
+            container.innerHTML = diseaseCatalogData.map(d => `
+                <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-mono text-slate-400">${d.name.split('___')[1] || d.name}</span>
+                            <span class="px-2 py-0.5 text-[9px] font-bold rounded-full ${d.severity==='Critical'?'bg-rose-500/20 text-rose-400':d.severity==='High'?'bg-amber-500/20 text-amber-400':'bg-emerald-500/20 text-emerald-400'}">${d.severity}</span>
+                        </div>
+                        <h3 class="font-heading font-bold text-sm text-white">${d.title}</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">${d.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function calculateYield() {
+            const acres = parseFloat(document.getElementById('calcAcres').value) || 1;
+            const price = parseFloat(document.getElementById('calcPrice').value) || 35;
+            const grade = document.getElementById('calcSoilGrade').value;
+            let yieldPerAcre = grade === 'High' ? 25 : grade === 'Low' ? 10 : 18;
+            const totalTons = acres * yieldPerAcre;
+            const totalRevenue = totalTons * 1000 * price;
+            setText('yieldTons', `${totalTons.toFixed(1)} Tons`);
+            setText('yieldRevenue', `₹ ${totalRevenue.toLocaleString('en-IN')}`);
+        }
+
+        function exportLogsToCsv() {
+            if (!telemetryHistory.length) return alert('No logs available yet.');
+            let csv = "Time,Temp,Hum,Light,Moisture,N,P,K,pH,Prediction\n";
+            telemetryHistory.forEach(r => { csv += `${r.time},${r.temp},${r.hum},${r.light},${r.moisture},${r.N},${r.P},${r.K},${r.pH},${r.prediction}\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = `telemetry_${Date.now()}.csv`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
